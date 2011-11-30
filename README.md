@@ -26,6 +26,28 @@ template tag" section below.
 
 [Yexpires]: http://developer.yahoo.com/performance/rules.html#expires
 
+### Quick example
+
+* Replace every instance of `{{ STATIC_URL }}foo/bar.css` (i.e. any use of
+  static assets in all templates) with the template tag
+  `{% hashedstatic "foo/bar.css" %}`. (Replace "`foo/bar.css`" with your actual
+  static asset paths.
+
+When deploying your static assets, you would previously perform:
+
+    django-admin.py collectstatic
+
+Now you should perform:
+
+    django-admin.py hashstatic
+    django-admin.py collectstatic
+
+If you want to be totally under the hashed-asset system you'd do this instead:
+
+    django-admin.py hashedstaticclear #removes old files so this deploy is only the latest
+    django-admin.py hashstatic --link #symlink, not copy, source files
+    django-admin.py collectstatic --hashed-only
+
 ### {% hashedstatic %} template tag
 
 Replaces the `{{ STATIC_URL }}foo/bar.css` paradigm in templates.
@@ -78,8 +100,10 @@ asset.
 Modified to include `HASHED_STATIC_ROOT` in addition to `STATICFILES_DIRS`
 (and app directories).
 
-New option `--strict` which ignores the `HASHED_STATIC_ROOT` -- i.e. brings
-back the original behavior of `collectstatic`.
+New options:
+
+* `--hashed-only` only deploys static assetss from `HASHED_STATIC_ROOT`.
+* `--plain` is the original Django behavior, ignoring `HASHED_STATIC_ROOT`.
 
     collectstatic [options]
 
