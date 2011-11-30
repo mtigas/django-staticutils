@@ -31,7 +31,7 @@ template tag" section below.
 * Replace every instance of `{{ STATIC_URL }}foo/bar.css` (i.e. any use of
   static assets in all templates) with the template tag
   `{% hashedstatic "foo/bar.css" %}`. (Replace "`foo/bar.css`" with your actual
-  static asset paths.
+  static asset paths.)
 
 When deploying your static assets, you would previously perform:
 
