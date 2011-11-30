@@ -48,6 +48,8 @@ If you want to be totally under the hashed-asset system you'd do this instead:
     django-admin.py hashstatic --link #symlink, not copy, source files
     django-admin.py collectstatic --hashed-only
 
+---
+
 ### {% hashedstatic %} template tag
 
 Replaces the `{{ STATIC_URL }}foo/bar.css` paradigm in templates.
