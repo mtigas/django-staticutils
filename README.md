@@ -1,14 +1,55 @@
-# hashstatic
+# staticutils
+
+Some useful additions to `django.contrib.staticfiles`, for real-world app
+development.
+
+Currently provides:
+
+* The ability to "version" static resources via a file MD5 hash.
+  * Commands: `hashstatic`, `hashstaticclear`, and modifications to the
+    existing `collectstatic`.
+  * See **Static File Versioning** section below.
+
+## Static File Versioning
+
+In a nutshell: allows you to set a far-future "Expires" header on all your
+static files, since every static file will get a "version tag" (part of the
+file's MD5 hash) added to the filename.
+
+Why? Best practices say that you should set a far-future "Expires" header on
+all your non-dynamic files, so that browsers (and proxies and CDNs) can cache
+them for better performance and less overall bandwidth usage. (See
+[this Yahoo Best Practices document][Yexpires].)
+
+For more information, on this implementation see the "{% hashedstatic %}
+template tag" section below.
+
+[Yexpires]: http://developer.yahoo.com/performance/rules.html#expires
+
+### {% hashedstatic %} template tag
+
+Replaces the `{{ STATIC_URL }}foo/bar.css` paradigm in templates.
+
+Given `{% hashedstatic "foo/bar.css" %}`, the hashed version of the given
+static asset is returned instead, with `STATIC_URL` prepended, i.e.
+`/statics/foo/bar.a8d2bd908f64.css`.
+
+For backwards-compatibility reasons `{% cachebust %}` is an alias for this.
+
+### hashstatic command
 
 "Collects" static files (the same way `collectstatic` would) into the
 filesystem at `HASHED_STATIC_ROOT`. Each filename gets a hash added, before
 the file extension (i.e. `foo/bar.css` -> `foo/bar.a8d2bd908f64.css`).
 
-Option `--link` simply turns the hash filename at `HASHED_STATIC_ROOT` into
-a symlink to the original (wherever it may be). This is useful if you want to
-use `collectstatic` to deploy these resources where they may later be cached
-(to a secondary webserver, S3/CloudFront or similar CDN, etc.) This *is* the
-intended usecase.
+Similar to `collectstatic`, the `--link` option simply turns the hash filename
+at `HASHED_STATIC_ROOT` into a symlink to the original (wherever it may be).
+This is useful if you want to use `collectstatic` to deploy these resources
+where they may later be cached (to a secondary webserver, S3/CloudFront or
+similar CDN, etc.) This *is* the intended usecase.
+
+By default (i.e. without `--link`), this command makes a copy of every static
+asset.
 
     hashstatic [options]
 
@@ -20,11 +61,19 @@ intended usecase.
       -l, --link            Create a symbolic link to each file instead of
                             copying.
 
-# hashstaticclear
+### hashstaticclear command
 
-Purges *old* hashed static files from `HASHED_STATIC_ROOT`.
 
-# collectstatic
+    hashstaticclear [options]
+
+    Purges *old* hashed static files from `HASHED_STATIC_ROOT`. Files
+    where the hash in the filename matches the source file's current MD5
+    hash are not removed, unless the `--all` flag is given.
+
+      --all                 Removes everything from `HASHED_STATIC_ROOT`.
+      --noinput             Does not prompt 
+
+### collectstatic command
 
 Modified to include `HASHED_STATIC_ROOT` in addition to `STATICFILES_DIRS`
 (and app directories).
