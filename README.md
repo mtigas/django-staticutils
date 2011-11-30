@@ -56,8 +56,6 @@ Given `{% hashedstatic "foo/bar.css" %}`, the hashed version of the given
 static asset is returned instead, with `STATIC_URL` prepended, i.e.
 `/statics/foo/bar.a8d2bd908f64.css`.
 
-For backwards-compatibility reasons `{% cachebust %}` is an alias for this.
-
 ### hashstatic command
 
 "Collects" static files (the same way `collectstatic` would) into the
@@ -73,6 +71,8 @@ similar CDN, etc.) This *is* the intended usecase.
 By default (i.e. without `--link`), this command makes a copy of every static
 asset.
 
+Usage:
+
     hashstatic [options]
 
     Collect static files from apps and other locations into the
@@ -85,6 +85,7 @@ asset.
 
 ### hashstaticclear command
 
+Usage:
 
     hashstaticclear [options]
 
@@ -104,6 +105,8 @@ New options:
 
 * `--hashed-only` only deploys static assetss from `HASHED_STATIC_ROOT`.
 * `--plain` is the original Django behavior, ignoring `HASHED_STATIC_ROOT`.
+
+Usage:
 
     collectstatic [options]
 
