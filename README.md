@@ -83,8 +83,15 @@ Usage:
     `HASHED_STATIC_ROOT` and adds a hash to each filename. (Used in conjunction
     with the {% cachebust %} template tag.)
 
+      --noinput             Do NOT prompt the user for input of any kind.
+      -i PATTERN, --ignore=PATTERN
+                            Ignore files or directories matching this glob-style
+                            pattern. Use multiple times to ignore more.
+      -n, --dry-run         Do everything except modify the filesystem.
       -l, --link            Create a symbolic link to each file instead of
                             copying.
+      --no-default-ignore   Don't ignore the common private glob-style patterns
+                            'CVS', '.*' and '*~'.
 
 ### clearhashedstatic command
 
