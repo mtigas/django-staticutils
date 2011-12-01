@@ -1,7 +1,7 @@
 import hashlib
 from django.contrib.staticfiles.finders import get_finders
 from django.core.exceptions import MiddlewareNotUsed
-from staticutils.settings import STATIC_HASH_LENGTH
+from staticutils.utils import file_version_hash
 
 asset_hashes = {}
 
@@ -16,8 +16,5 @@ class CacheBusterMiddleware(object):
     def __init__(self):
         for finder in get_finders():
             for path, storage in finder.list([]):
-                hash = hashlib.md5()
-                hash.update(storage.open(path, 'rb').read())
-                version = '%s' % hash.hexdigest()
-                asset_hashes[path] = version[0:STATIC_HASH_LENGTH]
+                asset_hashes[path] = file_version_hash(path, storage)
         raise MiddlewareNotUsed
