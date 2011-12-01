@@ -77,10 +77,9 @@ Usage:
 
     hashstatic [options]
 
-    Collect static files from apps and other locations into the
-    `HASHED_STATIC_ROOT` defined in settings, and adds a hash to each
-    filename. (Used in conjunction with the {% cachebust %} template tag to
-    map filenames to hashed filenames in templates.)
+    Collect static files from apps and other locations into
+    `HASHED_STATIC_ROOT` and adds a hash to each filename. (Used in conjunction
+    with the {% cachebust %} template tag.)
 
       -l, --link            Create a symbolic link to each file instead of
                             copying.
@@ -91,12 +90,13 @@ Usage:
 
     clearhashedstatic [options]
 
-    Purges *old* hashed static files from `HASHED_STATIC_ROOT`. Files
-    where the hash in the filename matches the source file's current MD5
-    hash are not removed, unless the `--all` flag is given.
+    Purges *old* hashed static files from `HASHED_STATIC_ROOT`. (Files
+    where the hash in the filename *matches* the source file's current MD5
+    hash are not removed, unless the `--all` flag is given.)
 
-      --all                 Removes everything from `HASHED_STATIC_ROOT`.
-      --noinput             Does not prompt 
+      --all                 Removes *everything* from `HASHED_STATIC_ROOT`,
+                            not just old versions.
+      --noinput             Does not prompt for confirmation when deleting.
 
 ### collectstatic command
 
@@ -105,7 +105,7 @@ Modified to include `HASHED_STATIC_ROOT` in addition to `STATICFILES_DIRS`
 
 New options:
 
-* `--hashed-only` only deploys static assetss from `HASHED_STATIC_ROOT`.
+* `--hashed-only` only deploys static assets from `HASHED_STATIC_ROOT`.
 * `--plain` is the original Django behavior, ignoring `HASHED_STATIC_ROOT`.
 
 Usage:
@@ -123,6 +123,10 @@ Usage:
                             copying.
       --no-default-ignore   Don't ignore the common private glob-style patterns
                             'CVS', '.*' and '*~'.
+      --hashed-only         Only collect static assets from `HASHED_STATIC_ROOT`.
+                            Cannot be used with `--plain`.
+      --plain               Ignore `HASHED_STATIC_ROOT`. (Original behavior.)
+                            Cannot be used with `--hashed-only`.
 
 
 
