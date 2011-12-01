@@ -32,6 +32,8 @@ template tag" section below.
   static assets in all templates) with the template tag
   `{% hashedstatic "foo/bar.css" %}`. (Replace "`foo/bar.css`" with your actual
   static asset paths.)
+* Add `HASHED_STATIC_ROOT` to settings. This is the location where your
+  generated assets will be stored.
 
 When deploying your static assets, you would previously perform:
 
@@ -127,6 +129,3 @@ Usage:
                             Cannot be used with `--plain`.
       --plain               Ignore `HASHED_STATIC_ROOT`. (Original behavior.)
                             Cannot be used with `--hashed-only`.
-
-
-
