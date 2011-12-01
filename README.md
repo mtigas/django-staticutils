@@ -6,7 +6,7 @@ development.
 Currently provides:
 
 * The ability to "version" static resources via a file MD5 hash.
-  * Commands: `hashstatic`, `hashstaticclear`, and modifications to the
+  * Commands: `hashstatic`, `clearhashedstatic`, and modifications to the
     existing `collectstatic`.
   * See **Static File Versioning** section below.
 
@@ -44,7 +44,7 @@ Now you should perform:
 
 If you want to be totally under the hashed-asset system you'd do this instead:
 
-    django-admin.py hashedstaticclear #removes old files so this deploy is only the latest
+    django-admin.py clearhashedstatic #removes old files so this deploy is only the latest
     django-admin.py hashstatic --link #symlink, not copy, source files
     django-admin.py collectstatic --hashed-only
 
@@ -85,11 +85,11 @@ Usage:
       -l, --link            Create a symbolic link to each file instead of
                             copying.
 
-### hashstaticclear command
+### clearhashedstatic command
 
 Usage:
 
-    hashstaticclear [options]
+    clearhashedstatic [options]
 
     Purges *old* hashed static files from `HASHED_STATIC_ROOT`. Files
     where the hash in the filename matches the source file's current MD5
