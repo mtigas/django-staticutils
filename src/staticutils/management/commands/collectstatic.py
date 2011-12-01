@@ -51,6 +51,8 @@ class Command(collectstatic.Command):
         # Have to copy the whole handle_noargs bit here because it dynamically
         # uses `django.contrib.staticfiles.finders` at runtime, which we can't
         # override unless we override the runtime behavior itself.
+        #
+        # Only modified line is "for finder in finders_to_use"
         symlink = options['link']
         ignore_patterns = options['ignore_patterns']
         if options['use_default_ignore_patterns']:
