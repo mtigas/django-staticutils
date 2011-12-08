@@ -71,7 +71,7 @@ Type 'yes' to continue, or 'no' to cancel: """)
                 raise CommandError("Collecting static files cancelled.")
 
         # Get output filenames for up-to-date static files.
-        self.valid_outpaths = []
+        self.valid_outpaths = set()
         if not options['all']:
             for finder in finders.get_finders():
                 for path, storage in finder.list(ignore_patterns):
@@ -81,18 +81,36 @@ Type 'yes' to continue, or 'no' to cancel: """)
                     else:
                         prefixed_path = path
 
-                    current_version = get_file_version(path, source_storage)
+                    current_version = get_file_version(path, storage)
                     current_outpath = get_versioned_path(
                         prefixed_path, current_version)
 
-                    self.valid_outpaths.append(prefixed_path)
+                    self.valid_outpaths.add(current_outpath)
 
-        # Find everything
-        def cleardirs(dirs, files):
-            for d in dirs:
-                cleardirs(*self.versioned_storage.listdir(d))
+        # Find everything currently in VERSIONED_STATIC_ROOT and remove
+        # anything not in `self.valid_outpaths`
+        def cleardirs(cd, subdirs, files):
+            for d in subdirs:
+                new_cd = os.path.join(cd, d)
+                new_subdirs, new_files = self.versioned_storage.listdir(
+                    os.path.join(cd, d)
+                )
+                cleardirs(new_cd, new_subdirs, new_files)
             for f in files:
-                print f
+                filepath = os.path.join(cd, f)
+                if filepath not in self.valid_outpaths:
+                    if options['dry_run']:
+                        self.log(u"Pretending to delete '%s'" % filepath)
+                    else:
+                        self.log(u"Deleting '%s'" % filepath)
+                        self.versioned_storage.delete(filepath)
+                    self.deleted_files.append(filepath)
+                else:
+                    self.log(u"Skipping up-to-date file '%s'" % filepath)
+                    self.unmodified_files.append(filepath)
+
+        subdirs, files = self.versioned_storage.listdir("")
+        cleardirs("", subdirs, files)
 
         actual_count = len(self.deleted_files)
         unmodified_count = len(self.unmodified_files)
