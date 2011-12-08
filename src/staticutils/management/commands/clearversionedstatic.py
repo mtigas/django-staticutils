@@ -11,13 +11,18 @@ from django.core.files.storage import get_storage_class
 
 
 class Command(NoArgsCommand):
-    help = "Purges *old* versioned static files from `VERSIONED_STATIC_ROOT`. "\
-           "(Files where the version *matches* the source file's current version "\
-           "are not removed, unless the `--all` flag is given.)"
+    help = "Purges all files from `VERSIONED_STATIC_ROOT` that are not "\
+           "current versions of static files. (Files where the version "\
+           "*matches* the source file's current version are not removed, "\
+           "unless the `--all` flag is given.)"
 
     option_list = NoArgsCommand.option_list + (
         make_option('-n', '--dry-run', action='store_true', dest='dry_run',
             default=False, help="Do everything except modify the filesystem."),
+        make_option('-i', '--ignore', action='append', default=[],
+            dest='ignore_patterns', metavar='PATTERN',
+            help="Ignore files or directories matching this glob-style "
+                "pattern. Use multiple times to ignore more."),
         make_option('--all',
             action='store_true',
             dest='all',
@@ -29,6 +34,10 @@ class Command(NoArgsCommand):
             dest='interactive',
             default=False,
             help='Does not prompt for confirmation when deleting.'),
+        make_option('--no-default-ignore', action='store_false',
+            dest='use_default_ignore_patterns', default=True,
+            help="Don't ignore the common private glob-style patterns 'CVS', "
+                "'.*' and '*~'."),
     )
 
     def __init__(self, *args, **kwargs):
@@ -39,15 +48,14 @@ class Command(NoArgsCommand):
         # Force storage to be a filesystem storage for VERSIONED_STATIC_ROOT.
         self.storage = get_storage_class(settings.STATICFILES_STORAGE)()
         self.versioned_storage = FileSystemStorage(location=settings.VERSIONED_STATIC_ROOT)
-        try:
-            self.storage.path('')
-        except NotImplementedError:
-            self.local = False
-        else:
-            self.local = True
 
     def handle_noargs(self, **options):
         self.verbosity = int(options.get('verbosity', 1))
+
+        ignore_patterns = options['ignore_patterns']
+        if options['use_default_ignore_patterns']:
+            ignore_patterns += ['CVS', '.*', '*~']
+        ignore_patterns = list(set(ignore_patterns))
 
         # Warn before doing anything more.
         if options.get('interactive'):
@@ -62,16 +70,29 @@ Type 'yes' to continue, or 'no' to cancel: """)
             if confirm != 'yes':
                 raise CommandError("Collecting static files cancelled.")
 
-        for finder in finders.get_finders():
-            for path, storage in finder.list(['CVS', '.*', '*~']):
-                # Prefix the relative path if the source storage contains it
-                if getattr(storage, 'prefix', None):
-                    prefixed_path = os.path.join(storage.prefix, path)
-                else:
-                    prefixed_path = path
-                self.remove_old_versions(
-                    path, prefixed_path, storage, **options
-                )
+        # Get output filenames for up-to-date static files.
+        self.valid_outpaths = []
+        if not options['all']:
+            for finder in finders.get_finders():
+                for path, storage in finder.list(ignore_patterns):
+                    # Prefix the relative path if source storage contains it
+                    if getattr(storage, 'prefix', None):
+                        prefixed_path = os.path.join(storage.prefix, path)
+                    else:
+                        prefixed_path = path
+
+                    current_version = get_file_version(path, source_storage)
+                    current_outpath = get_versioned_path(
+                        prefixed_path, current_version)
+
+                    self.valid_outpaths.append(prefixed_path)
+
+        # Find everything
+        def cleardirs(dirs, files):
+            for d in dirs:
+                cleardirs(*self.versioned_storage.listdir(d))
+            for f in files:
+                print f
 
         actual_count = len(self.deleted_files)
         unmodified_count = len(self.unmodified_files)
