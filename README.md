@@ -126,18 +126,21 @@ implementation, and vary between Django versions.
 
 #### clearversionedstatic command
 
+Removes all files from `VERSIONED_STATIC_ROOT` that are not up-to-date versions
+of static files. (If `--all` is given, those are deleted too.)
+
 ##### Usage
 
     django-admin.py clearversionedstatic [options]
 
-    Purges *old* versioned static files from `VERSIONED_STATIC_ROOT`. (Files 
-    where the version *matches* the source file's current version are not 
-    removed, unless the `--all` flag is given.)
+    Purges all files from `VERSIONED_STATIC_ROOT` that are not current versions
+    of static files. (Files where the version *matches* the source file's
+    current version are not removed, unless the `--all` flag is given.)
 
     Options:
 
-    --all                 Removes *everything* from `VERSIONED_STATIC_ROOT`, not
-                          just old versions
+    --all                 Removes *everything* from `VERSIONED_STATIC_ROOT`,
+                          including up-to-date versioned files.
     --noinput             Does not prompt for confirmation when deleting.
 
 #### collectstatic command
@@ -160,6 +163,12 @@ by `STATICFILES_FINDERS`. This commands adds the options `--only-versioned` and
                           Cannot be used with `--only-versioned`.
 
 ## Settings
+
+### VERSIONED_STATIC_ROOT
+
+Similar to `STATIC_ROOT` (with the default FileSystemStorage). This is the
+local directory where versioned files are stored, usually as a staging area
+before they are collected with the `collectstatic` command.
 
 ### STATIC_VERSION_GENERATOR
 
